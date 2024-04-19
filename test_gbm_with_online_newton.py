@@ -92,7 +92,7 @@ if __name__ == "__main__":
     plt.ylabel('Stock Price')
     plt.title('Geometric Brownian Motion Simulations')
     plt.grid(True)
-    plt.show(block=True)
+    plt.show()
 
     # solve max gain of fixed strategy
     x = cp.Variable(args.simulations)  
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     plt.ylabel('Cumulative loss')
     plt.legend()
     plt.grid(True)
-    plt.show(block=True)
+    plt.show()
 
     plt.figure(figsize=(27, 6)) 
     plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs)),label='Online Newton Method')
@@ -132,4 +132,4 @@ if __name__ == "__main__":
     plt.ylabel('Money change(per dollars)')
     plt.legend()
     plt.grid(True)
-    plt.show(block=True)
+    plt.show()
