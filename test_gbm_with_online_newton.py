@@ -1,4 +1,4 @@
-import argparse
+import argparse, os
 import numpy as np
 import matplotlib.pyplot as plt
 import cvxpy as cp
@@ -66,10 +66,11 @@ if __name__ == "__main__":
     # Parameters
     parser = argparse.ArgumentParser(description="Simulate geometric brownian motion")
     parser.add_argument("--T", type=float, default=1, help="Time horizon")
-    parser.add_argument("--N", type=int, default=301, help="Number of time steps")
+    parser.add_argument("--N", type=int, default=101, help="Number of time steps")
     parser.add_argument("--S0", type=float, default=100, help="Initial stock price")
     parser.add_argument("--simulations", type=int, default=5, help="Number of simulations")
     parser.add_argument("--use_flh", action='store_true', help="If use full time FLH")
+    parser.add_argument("--path", type=str, default='tmp_test', help="Path of folder to save the plot")
     args = parser.parse_args()
 
     # Generate geometric brownian motion
@@ -92,7 +93,12 @@ if __name__ == "__main__":
     plt.ylabel('Stock Price')
     plt.title('Geometric Brownian Motion Simulations')
     plt.grid(True)
-    plt.show()
+    # plt.show()
+    current_path = os.path.dirname(os.path.abspath('__file__'))
+    save_path = os.path.join(current_path, args.path)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    plt.savefig(os.path.join(save_path,'geometric_brownian_motion.png'))
 
     # solve max gain of fixed strategy
     x = cp.Variable(args.simulations)  
@@ -120,7 +126,8 @@ if __name__ == "__main__":
     plt.ylabel('Cumulative loss')
     plt.legend()
     plt.grid(True)
-    plt.show()
+    # plt.show()
+    plt.savefig(os.path.join(save_path,'online_newton_loss.png'))
 
     plt.figure(figsize=(27, 6)) 
     plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs)),label='Online Newton Method')
@@ -132,4 +139,5 @@ if __name__ == "__main__":
     plt.ylabel('Money change(per dollars)')
     plt.legend()
     plt.grid(True)
-    plt.show()
+    # plt.show()
+    plt.savefig(os.path.join(save_path,'online_newton_money_change.png'))
