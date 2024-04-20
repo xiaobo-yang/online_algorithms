@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     plt.xlabel('Time')
     plt.ylabel('Stock Price')
-    plt.title('Geometric Brownian Motion Simulations')
+    plt.title(f'Geometric Brownian Motion Simulations with N={args.N} and T={args.T}')
     plt.grid(True)
     # plt.show()
     current_path = os.path.dirname(os.path.abspath('__file__'))
