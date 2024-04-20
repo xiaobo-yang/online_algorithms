@@ -166,6 +166,7 @@ def flh2_portfolio(
     p = np.array([1.] + [0. for _ in range(T - 1)])
     all_ps = [p]
     S_t = [0]
+    S_ts = [S_t.copy()]
 
     for t in tqdm(range(1, T + 1)):
         tmp_r = ratios[:, t - 1]
@@ -202,6 +203,7 @@ def flh2_portfolio(
             if t - i > 2 ** (k + 2):
                 S_t.remove(i)
         S_t.append(t)
+        S_ts.append(S_t.copy())
 
         # New expert weights
         norm_const = p[S_t].sum()
