@@ -2,7 +2,7 @@ import argparse, os
 import numpy as np
 import matplotlib.pyplot as plt
 import cvxpy as cp
-from online_newton import online_newton_portfolio, flh_portfolio, flh2_portfolio
+from online_optimization import online_gd_portfolio, online_newton_portfolio, follow_leading_history_portfolio
 
 # Simulation data
 def geometric_brownian_motion(T, N, mu, sigma, S0):
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     plt.xlabel('Time')
     plt.ylabel('Stock Price')
-    plt.title('Geometric Brownian Motion Simulations')
+    plt.title(f'Geometric Brownian Motion Simulations with N={args.N} and T={args.T}')
     plt.grid(True)
     # plt.show()
     current_path = os.path.dirname(os.path.abspath('__file__'))
@@ -111,16 +111,22 @@ if __name__ == "__main__":
     print(f"Optimal solution: {optimal_x}")
 
     # solve online newton strategy
-    xs, rs, costs = online_newton_portfolio(args.simulations, args.N-1, value_changes, use_eps=True)
+    xs, costs = online_newton_portfolio(args.simulations, args.N-1, value_changes, use_eps=True)
     if args.use_flh:
-        xs1, costs1, all_ps1, all_tmp_xs1 = flh_portfolio(args.simulations, args.N-1, value_changes, use_eps=True)
-    xs2, costs2, all_ps2, all_tmp_xs2 = flh2_portfolio(args.simulations, args.N-1, value_changes, use_eps=True)
+        xs4, costs4, _, _, _  = follow_leading_history_portfolio(args.simulations, args.N-1, value_changes, use_eps=True, prune=False, optimizer='gd')
+        xs1, costs1, _, _, _  = follow_leading_history_portfolio(args.simulations, args.N-1, value_changes, use_eps=True, prune=False, optimizer='newton')
+    xs2, costs2, _, _, _  = follow_leading_history_portfolio(args.simulations, args.N-1, value_changes, use_eps=True, optimizer='newton')
+    xs3, costs3 = online_gd_portfolio(args.simulations, args.N-1, value_changes)
+    xs5, costs5, _, _, _  = follow_leading_history_portfolio(args.simulations, args.N-1, value_changes, use_eps=True, optimizer='gd')
 
     plt.figure(figsize=(27, 6)) 
+    plt.plot(np.linspace(0, 1, args.N)[1:], np.cumsum(costs3),label='Online GD Method')
     plt.plot(np.linspace(0, 1, args.N)[1:], np.cumsum(costs),label='Online Newton Method')
     if args.use_flh:
         plt.plot(np.linspace(0, 1, args.N)[1:], np.cumsum(costs1),label='Online Newton Method with FLH')
+        plt.plot(np.linspace(0, 1, args.N)[1:], np.cumsum(costs4),label='Online GD Method with FLH')
     plt.plot(np.linspace(0, 1, args.N)[1:], np.cumsum(costs2),label='Online Newton Method with FLH2')
+    plt.plot(np.linspace(0, 1, args.N)[1:], np.cumsum(costs5),label='Online GD Method with FLH2')
     plt.plot(np.linspace(0, 1, args.N)[1:], np.cumsum(max_gain_costs),label='max gain')
     plt.xlabel('Time')
     plt.ylabel('Cumulative loss')
@@ -130,10 +136,13 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(save_path,'online_newton_loss.png'))
 
     plt.figure(figsize=(27, 6)) 
+    plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs3)),label='Online GD Method')
     plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs)),label='Online Newton Method')
     if args.use_flh:
         plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs1)),label='Online Newton Method with FLH')
+        plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs4)),label='Online GD Method with FLH')
     plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs2)),label='Online Newton Method with FLH2')
+    plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(costs5)),label='Online GD Method with FLH2')
     plt.plot(np.linspace(0, 1, args.N)[1:], np.exp(-np.cumsum(max_gain_costs)),label='max gain')
     plt.xlabel('Time')
     plt.ylabel('Money change(per dollars)')
